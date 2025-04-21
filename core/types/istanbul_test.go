@@ -17,6 +17,7 @@
 package types
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -51,14 +52,14 @@ func TestExtractToIstanbulExtra(t *testing.T) {
 	}{
 		{
 			// normal case
-			hexutil.MustDecode("0xf85b80f8549444add0ec310f115a0e603b2d7db9f067778eaf8a94294fc7e8f22b3bcdcf955dd7ff3ba2ed833f8212946beaaed781d2d2ab6350f5c4566a2c6eaac407a6948be76812f765c24641ec63dc2852b378aba2b440c080c080"),
+			hexutil.MustDecode("0xf85b80f85494dac22e5518f5fb45d54f4273a74ec65bfb7d9d70942bd86dd271331a2d88eb26d29cf64769a7e58ac59429e52f8bcf83e91db155a3e7bcbb515c503868d494329eb77663d658e946f481aeb6729664e99c8cc7c080c080"),
 			&IstanbulExtra{
 				VanityData: []byte{},
 				Validators: []common.Address{
-					common.BytesToAddress(hexutil.MustDecode("0x44add0ec310f115a0e603b2d7db9f067778eaf8a")),
-					common.BytesToAddress(hexutil.MustDecode("0x294fc7e8f22b3bcdcf955dd7ff3ba2ed833f8212")),
-					common.BytesToAddress(hexutil.MustDecode("0x6beaaed781d2d2ab6350f5c4566a2c6eaac407a6")),
-					common.BytesToAddress(hexutil.MustDecode("0x8be76812f765c24641ec63dc2852b378aba2b440")),
+					common.BytesToAddress(hexutil.MustDecode("0xcac22e5518f5fb45d54f4273a74ec65bfb7d9d70")),
+					common.BytesToAddress(hexutil.MustDecode("0x2bd86dd271331a2d88eb26d29cf64769a7e58ac5")),
+					common.BytesToAddress(hexutil.MustDecode("0x29e52f8bcf83e91db155a3e7bcbb515c503868d4")),
+					common.BytesToAddress(hexutil.MustDecode("0x329eb77663d658e946f481aeb6729664e99c8cc7")),
 				},
 				CommittedSeal: [][]byte{},
 				Round:         0,
@@ -74,6 +75,7 @@ func TestExtractToIstanbulExtra(t *testing.T) {
 		if err != test.expectedErr {
 			t.Errorf("expected: %v, but got: %v", test.expectedErr, err)
 		}
+		fmt.Printf("Extracted IstanbulExtra: %+v\n", istanbulExtra)
 		if !reflect.DeepEqual(istanbulExtra, test.expectedResult) {
 			t.Errorf("expected: %v, but got: %v", test.expectedResult, istanbulExtra)
 		}

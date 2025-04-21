@@ -22,6 +22,8 @@ import (
 	"io"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rlp"
 )
 
@@ -39,6 +41,8 @@ var (
 
 	// ErrInvalidIstanbulHeaderExtra is returned if the length of extra-data is less than 32 bytes
 	ErrInvalidIstanbulHeaderExtra = errors.New("invalid istanbul header extra-data")
+
+	ErrInvalidIstanbulExtra = errors.New("invalid istanbul extra data")
 )
 
 // ##CROSS: istanbul digest
@@ -124,12 +128,28 @@ func (vv *ValidatorVote) DecodeRLP(s *rlp.Stream) error {
 // error if the length of the given extra-data is less than 32 bytes or the extra-data can not
 // be decoded.
 func ExtractIstanbulExtra(h *Header) (*IstanbulExtra, error) {
-	extra := new(IstanbulExtra)
-	err := rlp.DecodeBytes(h.Extra[:], extra)
+	log.Info("Extracting IstanbulExtra", "extraData", hexutil.Encode(h.Extra))
+
+	if len(h.Extra) < IstanbulExtraVanity {
+		log.Error("Invalid IstanbulExtra length", "length", len(h.Extra), "required", IstanbulExtraVanity)
+		return nil, ErrInvalidIstanbulExtra
+	}
+
+	var istanbulExtra *IstanbulExtra
+	err := rlp.DecodeBytes(h.Extra[IstanbulExtraVanity:], &istanbulExtra)
 	if err != nil {
+		log.Error("Failed to decode IstanbulExtra", "err", err, "extraData", hexutil.Encode(h.Extra[IstanbulExtraVanity:]))
 		return nil, err
 	}
-	return extra, nil
+
+	log.Info("Successfully extracted IstanbulExtra",
+		"vanityData", hexutil.Encode(istanbulExtra.VanityData),
+		"validators", istanbulExtra.Validators,
+		"round", istanbulExtra.Round,
+		"committedSeal", len(istanbulExtra.CommittedSeal),
+		"randomReveal", hexutil.Encode(istanbulExtra.RandomReveal))
+
+	return istanbulExtra, nil
 }
 
 // IstanbulFilteredHeader returns a filtered header which some information (like committed seals, round, validator vote)
